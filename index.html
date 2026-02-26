@@ -1,0 +1,2038 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autoformalization — Current Limitations</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=JetBrains+Mono:wght@400;500&amp;family=Source+Sans+3:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #faf8f4;
+    --paper-dark: #f2efe9;
+    --ink: #1a1814;
+    --ink-mid: #3d3a35;
+    --ink-light: #7a7570;
+    --ink-faint: #b8b4ae;
+    --rule: #d8d4ce;
+    --accent: #8b2020;
+    --tag-bg: #e8e4de;
+    --green: #166534;
+    --green-bg: #dcfce7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding: 32px 0 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .journal-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'EB Garamond', serif;
+    font-size: clamp(26px, 4vw, 42px);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 0 22px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-light);
+    letter-spacing: 0.05em;
+  }
+
+  .meta-sep { color: var(--rule); }
+
+  .count-badge {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 2px;
+  }
+
+  .header-tabs {
+    display: flex;
+    gap: 0;
+    margin-top: 4px;
+  }
+
+  .tab-btn {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border: none;
+    background: transparent;
+    color: var(--ink-light);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+    letter-spacing: 0.02em;
+  }
+
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+
+  /* MAIN */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 40px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ABSTRACT */
+  .abstract-box {
+    border-left: 3px solid var(--accent);
+    background: var(--paper-dark);
+    padding: 20px 24px;
+    margin-bottom: 36px;
+    font-family: 'EB Garamond', serif;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-mid);
+  }
+
+  .abstract-box strong {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  /* SEARCH */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .search-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    border: 1px solid var(--rule);
+    background: white;
+    padding: 9px 12px 9px 36px;
+    outline: none;
+    color: var(--ink);
+    transition: border-color 0.15s;
+  }
+
+  .search-wrap input:focus { border-color: var(--ink-light); }
+  .search-wrap input::placeholder { color: var(--ink-faint); }
+
+  .search-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-faint);
+    font-size: 15px;
+    pointer-events: none;
+  }
+
+  /* CATEGORY SECTIONS */
+  .category-section {
+    margin-bottom: 44px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .category-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 0;
+    flex-wrap: wrap;
+  }
+
+  .cat-header-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .category-name {
+    font-family: 'EB Garamond', serif;
+    font-size: 23px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .category-desc-text {
+    font-size: 13px;
+    color: var(--ink-light);
+    font-style: italic;
+    flex: 1;
+  }
+
+  .category-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+    margin-left: auto;
+  }
+
+  /* CARDS */
+  .cards-list { display: flex; flex-direction: column; }
+
+  .card {
+    border: 1px solid var(--rule);
+    border-top: none;
+    background: white;
+    transition: box-shadow 0.15s;
+  }
+
+  .card:first-child { border-top: 1px solid var(--rule); }
+  .card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.055); z-index: 2; position: relative; }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 22px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .card-num {
+    font-family: 'EB Garamond', serif;
+    font-size: 19px;
+    color: var(--accent);
+    min-width: 26px;
+    line-height: 1.2;
+    margin-top: 2px;
+    opacity: 0.7;
+  }
+
+  .card-title-wrap { flex: 1; }
+
+  .card-title {
+    font-family: 'EB Garamond', serif;
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 5px;
+    line-height: 1.25;
+  }
+
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+  .severity-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .sev-major      { background: #fee2e2; color: #991b1b; }
+  .sev-minor      { background: #fef3c7; color: #92400e; }
+  .sev-structural { background: #ede9fe; color: #5b21b6; }
+  .sev-open       { background: var(--green-bg); color: var(--green); }
+
+  .card-chevron {
+    color: var(--ink-faint);
+    font-size: 13px;
+    transition: transform 0.2s;
+    margin-top: 4px;
+  }
+
+  .card.open .card-chevron { transform: rotate(180deg); }
+
+  .card-body {
+    display: none;
+    padding: 4px 22px 22px 62px;
+    border-top: 1px solid var(--paper-dark);
+  }
+
+  .card.open .card-body { display: block; }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 16px 0 5px;
+  }
+
+  .card-body p {
+    font-size: 15px;
+    color: var(--ink-mid);
+    line-height: 1.65;
+  }
+
+  .example-box {
+    background: var(--paper-dark);
+    border-left: 2px solid var(--rule);
+    padding: 10px 14px;
+    margin: 10px 0;
+  }
+
+  .ex-row {
+    font-size: 14px;
+    margin-bottom: 3px;
+    line-height: 1.5;
+  }
+
+  .ex-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-right: 8px;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: #eee9e3;
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: var(--accent);
+  }
+
+  .refs-list {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  .ref-chip {
+    border: 1px solid var(--rule);
+    padding: 1px 7px;
+    border-radius: 2px;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--paper-dark);
+  }
+
+  /* ADD-TO-CATEGORY ROW */
+  .add-entry-row {
+    border: 1px dashed var(--rule);
+    border-top: none;
+    background: transparent;
+    padding: 11px 22px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .add-entry-row:hover { background: white; }
+
+  .add-entry-row span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  .add-entry-row:hover span { color: var(--accent); }
+
+  .cat-empty {
+    border: 1px dashed var(--rule);
+    border-top: none;
+    padding: 18px 22px;
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+
+  /* BUTTONS */
+  .btn {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 16px;
+    border: 1px solid var(--rule);
+    background: white;
+    cursor: pointer;
+    color: var(--ink-mid);
+    transition: all 0.15s;
+  }
+
+  .btn:hover { border-color: var(--ink-light); color: var(--ink); background: var(--paper-dark); }
+  .btn.btn-danger:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.btn-primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .btn.btn-primary:hover { background: var(--ink-mid); }
+  .btn.btn-sm { font-size: 12px; padding: 5px 12px; }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid transparent;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--ink-faint);
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+
+  .icon-btn:hover { border-color: var(--rule); color: var(--ink-light); background: var(--paper-dark); }
+  .icon-btn.danger:hover { border-color: #fca5a5; color: var(--accent); background: #fff5f5; }
+
+  /* FORMS */
+  .form-panel {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 30px 34px;
+    margin-bottom: 28px;
+  }
+
+  .form-panel h2 {
+    font-family: 'EB Garamond', serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: var(--ink);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 22px;
+  }
+
+  .form-field { display: flex; flex-direction: column; gap: 5px; }
+  .form-field.full { grid-column: 1 / -1; }
+
+  label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+  }
+
+  input[type=text], textarea, select {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    padding: 8px 12px;
+    outline: none;
+    color: var(--ink);
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+
+  input[type=text]:focus, textarea:focus, select:focus { border-color: var(--ink-mid); background: white; }
+  textarea { resize: vertical; min-height: 72px; }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* CATEGORY MANAGEMENT */
+  .cat-mgmt-grid { display: flex; flex-direction: column; }
+
+  .cat-mgmt-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 22px;
+    border: 1px solid var(--rule);
+    border-top: none;
+    background: white;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .cat-mgmt-row:first-child { border-top: 1px solid var(--rule); }
+
+  .cat-icon-box {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: var(--paper-dark);
+    border-radius: 2px;
+    flex-shrink: 0;
+    border: 1px solid var(--rule);
+  }
+
+  .cat-info { flex: 1; }
+
+  .cat-info-name {
+    font-family: 'EB Garamond', serif;
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+
+  .cat-info-desc {
+    font-size: 13px;
+    color: var(--ink-light);
+    line-height: 1.4;
+  }
+
+  .cat-info-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-top: 5px;
+    letter-spacing: 0.05em;
+  }
+
+  .cat-mgmt-actions { display: flex; gap: 4px; align-items: center; padding-top: 2px; }
+
+  /* NEW/EDIT CATEGORY INLINE FORM */
+  .cat-form-panel {
+    background: var(--paper-dark);
+    border: 1px dashed var(--rule);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .cat-form-panel.open { display: block; }
+
+  .cat-form-panel h3 {
+    font-family: 'EB Garamond', serif;
+    font-size: 19px;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+
+  .cat-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 80px;
+    gap: 12px;
+    align-items: end;
+  }
+
+  /* STATS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 18px 20px;
+  }
+
+  .stat-num {
+    font-family: 'EB Garamond', serif;
+    font-size: 40px;
+    font-weight: 500;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .dist-section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 12px;
+  }
+
+  .dist-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 9px;
+  }
+
+  .dist-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mid);
+    min-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dist-bar-wrap {
+    flex: 1;
+    height: 7px;
+    background: var(--paper-dark);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .dist-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 1px;
+    transition: width 0.6s ease;
+  }
+
+  .dist-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    min-width: 18px;
+    text-align: right;
+  }
+
+  hr.section-rule {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 24px 0;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,24,20,0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 28px 32px;
+    max-width: 460px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    position: relative;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 14px; right: 18px;
+    background: none; border: none;
+    font-size: 22px; cursor: pointer;
+    color: var(--ink-faint);
+  }
+
+  .modal-close:hover { color: var(--ink); }
+
+  .modal h2 {
+    font-family: 'EB Garamond', serif;
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .modal p {
+    font-size: 14px;
+    color: var(--ink-mid);
+    margin-bottom: 20px;
+    line-height: 1.55;
+  }
+
+  .hidden { display: none !important; }
+
+  .empty-global {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--ink-faint);
+    font-family: 'EB Garamond', serif;
+    font-size: 17px;
+    font-style: italic;
+  }
+
+  .page-section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .page-section-title {
+    font-family: 'EB Garamond', serif;
+    font-size: 26px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .page-section-subtitle {
+    font-size: 13px;
+    color: var(--ink-light);
+  }
+
+  @media (max-width: 620px) {
+    .header-inner, main { padding-left: 18px; padding-right: 18px; }
+    .form-grid, .cat-form-grid { grid-template-columns: 1fr; }
+    .card-body { padding-left: 22px; }
+    .card-num { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="journal-label">Research Limitations Tracker — Neural-Symbolic Autoformalization</div>
+    <h1>Current Limitations of <em>Autoformalization</em><br>for Mathematics</h1>
+    <div class="header-meta">
+      <span class="meta-item">Updated: <span id="lastUpdated">February 26, 2026</span></span>
+      <span class="meta-sep">|</span>
+      <span class="meta-item">Lean 4 / Mathlib</span>
+      <span class="meta-sep">|</span>
+      <span class="count-badge" id="totalBadge">9 limitations · 7 categories</span>
+    </div>
+    <div class="header-tabs">
+      <button class="tab-btn active" data-tab="browse" onclick="switchTab(this,'browse')">Browse</button>
+      <button class="tab-btn" data-tab="categories" onclick="switchTab(this,'categories')">Categories</button>
+      <button class="tab-btn" data-tab="add" onclick="switchTab(this,'add')">+ Add Limitation</button>
+      <button class="tab-btn" data-tab="stats" onclick="switchTab(this,'stats')">Statistics</button>
+      <button class="tab-btn" style="margin-left:auto;color:var(--accent);font-weight:600;" onclick="exportHTML()" title="Download updated HTML to re-publish">↓ Export</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ────────────────── BROWSE ────────────────── -->
+  <div class="view active" id="view-browse">
+    <div class="abstract-box">
+      <strong>Field Abstract</strong>
+      Recent advances in LLMs demonstrate high proficiency in informal mathematical reasoning and code
+      generation. However, end-to-end autoformalization — translating natural language mathematics into
+      formal verifiers like Lean 4 — remains brittle. This tracker records structural and semantic
+      bottlenecks, grouped by error category.
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="Search all limitations…" oninput="renderBrowse()">
+      </div>
+    </div>
+    <div id="browseContent">
+      <div class="category-section" id="section-type-system">
+        <div class="category-header">
+          <span class="cat-header-icon">⚙️</span>
+          <span class="category-name">Type System</span>
+          <span class="category-desc-text">Errors from type inference, coercions, and missing type declarations</span>
+          <span class="category-count">1 error</span>
+        </div>
+        <div class="cards-list">
+          
+    <div class="card" id="card-1">
+      <div class="card-header" onclick="toggleCard('1')">
+        <div class="card-num">01.</div>
+        <div class="card-title-wrap">
+          <div class="card-title">The Translation Paradox</div>
+          <div class="card-tags">
+            <span class="severity-badge sev-major">Major</span>
+          </div>
+        </div>
+        <span class="card-chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Description</div>
+        <p>Informal mathematics relies on high-context ambiguity; formal mathematics requires zero-ambiguity type precision.</p>
+        <div class="section-label">The Issue</div><p>Human writers omit type declarations — "Let n be a number" implies n ∈ ℕ or n ∈ ℝ depending on context.</p>
+        <div class="section-label">Failure Mode</div><p>Model infers types stochastically, guessing Float for reals or Int for naturals, causing cascading type mismatch errors.</p>
+        
+          <div class="section-label">Example</div>
+          <div class="example-box">
+            <div class="ex-row"><span class="ex-label">Input</span>"Let x be a number…"</div>
+            <div class="ex-row"><span class="ex-label">Output</span><code>(x : Float) … → Compiler Error: expected Set ℝ, got Float.</code></div>
+          </div>
+        
+          <div class="section-label">References</div>
+          <div class="refs-list"><span class="ref-chip">Tarrach et al. 2024</span><span class="ref-chip">Wu et al. 2025</span></div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="startEdit('1');event.stopPropagation()">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="startDeleteLim('1');event.stopPropagation()">Delete</button>
+        </div>
+      </div>
+    </div>
+          
+        </div>
+        <div class="add-entry-row" onclick="addToCategory('type-system')"><span>+ add error to Type System</span></div>
+      </div>
+      <div class="category-section" id="section-semantics">
+        <div class="category-header">
+          <span class="cat-header-icon">∿</span>
+          <span class="category-name">Semantics</span>
+          <span class="category-desc-text">Failures in preserving the mathematical meaning of a statement</span>
+          <span class="category-count">3 errors</span>
+        </div>
+        <div class="cards-list">
+          
+    <div class="card" id="card-4">
+      <div class="card-header" onclick="toggleCard('4')">
+        <div class="card-num">01.</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Dimensional Misalignment</div>
+          <div class="card-tags">
+            <span class="severity-badge sev-major">Major</span>
+          </div>
+        </div>
+        <span class="card-chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Description</div>
+        <p>Models correctly identify algebraic structures but fail to capture dimensionality, producing valid code formalizing a different problem.</p>
+        <div class="section-label">The Issue</div><p>Notation ℚ[x,y] vs ℚ[x] provides minimal visual distinction but a critical semantic difference.</p>
+        <div class="section-label">Failure Mode</div><p>Model defaults to univariate Polynomial instead of MvPolynomial (Fin 2), treating Y as a constant coefficient.</p>
+        
+          <div class="section-label">Example</div>
+          <div class="example-box">
+            <div class="ex-row"><span class="ex-label">Input</span>"Prove that x²+y²−1 is irreducible in ℚ[x,y]."</div>
+            <div class="ex-row"><span class="ex-label">Output</span><code>Irreducible (X²+Y²−1 : Polynomial ℚ) := sorry</code></div>
+          </div>
+        
+          <div class="section-label">References</div>
+          <div class="refs-list"><span class="ref-chip">Herald 2025</span><span class="ref-chip">Lu et al. 2025</span></div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="startEdit('4');event.stopPropagation()">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="startDeleteLim('4');event.stopPropagation()">Delete</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="card-6">
+      <div class="card-header" onclick="toggleCard('6')">
+        <div class="card-num">02.</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Semantic Drift — Tautology Trap</div>
+          <div class="card-tags">
+            <span class="severity-badge sev-major">Major</span>
+          </div>
+        </div>
+        <span class="card-chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Description</div>
+        <p>Models optimize for token likelihood, generating valid code that is mathematically trivial compared to the intended statement.</p>
+        <div class="section-label">The Issue</div><p>Complex geometric predicates are statistically rare; simple tautologies are statistically common in training data.</p>
+        <div class="section-label">Failure Mode</div><p>Model rewrites "Show four points form a convex quadrilateral" as "The convex hull of four points is convex" — a tautology.</p>
+        
+          <div class="section-label">Example</div>
+          <div class="example-box">
+            <div class="ex-row"><span class="ex-label">Input</span>"Show that four points form a convex quadrilateral."</div>
+            <div class="ex-row"><span class="ex-label">Output</span><code>"Show that the convex hull of four points is convex." (tautology)</code></div>
+          </div>
+        
+          <div class="section-label">References</div>
+          <div class="refs-list"><span class="ref-chip">PutnamBench 2024</span><span class="ref-chip">Liu et al. 2024</span></div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="startEdit('6');event.stopPropagation()">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="startDeleteLim('6');event.stopPropagation()">Delete</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="card-9">
+      <div class="card-header" onclick="toggleCard('9')">
+        <div class="card-num">03.</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Implicit Knowledge Gap</div>
+          <div class="card-tags">
+            <span class="severity-badge sev-structural">Structural</span>
+          </div>
+        </div>
+        <span class="card-chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Description</div>
+        <p>Human textbooks omit steps "obvious" to readers that formal compilers strictly require, causing missing type class instance errors.</p>
+        <div class="section-label">The Issue</div><p>Proofs say "it is trivial to see that X is a group" — the implicit prerequisite is absent from the source text.</p>
+        <div class="section-label">Failure Mode</div><p>Lean 4 rejects code because a type class instance (proof that something is a group) is missing from the dependency graph.</p>
+        
+          <div class="section-label">Example</div>
+          <div class="example-box">
+            <div class="ex-row"><span class="ex-label">Input</span>"It is trivial to see that X is a group…"</div>
+            <div class="ex-row"><span class="ex-label">Output</span><code>failed to synthesize instance Group X</code></div>
+          </div>
+        
+          <div class="section-label">References</div>
+          <div class="refs-list"><span class="ref-chip">Tarrach et al. 2024</span><span class="ref-chip">Wu et al. 2025</span></div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="startEdit('9');event.stopPropagation()">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="startDeleteLim('9');event.stopPropagation()">Delete</button>
+        </div>
+      </div>
+    </div>
+          
+        </div>
+        <div class="add-entry-row" onclick="addToCategory('semantics')"><span>+ add error to Semantics</span></div>
+      </div>
+      <div class="category-section" id="section-syntax">
+        <div class="category-header">
+          <span class="cat-header-icon">{ }</span>
+          <span class="category-name">Syntax</span>
+          <span class="category-desc-text">Structural incompatibility with Lean 4 syntax rules</span>
+          <span class="category-count">1 error</span>
+        </div>
+        <div class="cards-list">
+          
+    <div class="card" id="card-5">
+      <div class="card-header" onclick="toggleCard('5')">
+        <div class="card-num">01.</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Definition Bottleneck</div>
+          <div class="card-tags">
+            <span class="severity-badge sev-structural">Structural</span>
+          </div>
+        </div>
+        <span class="card-chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Description</div>
+        <p>Fundamental conflict between the imperative flow of natural language and the declarative structure of dependent type theory.</p>
+        <div class="section-label">The Issue</div><p>Informal math defines objects linearly. Formal systems require dependency injection or hypothesis lifting.</p>
+        <div class="section-label">Failure Mode</div><p>Models insert let bindings into theorem signatures, syntactically illegal in Lean 4.</p>
+        
+          <div class="section-label">Example</div>
+          <div class="example-box">
+            <div class="ex-row"><span class="ex-label">Input</span>"First let x = 5, now consider f(x)…"</div>
+            <div class="ex-row"><span class="ex-label">Output</span><code>Syntax error: expected ';' or unexpected token 'let'.</code></div>
+          </div>
+        
+          <div class="section-label">References</div>
+          <div class="refs-list"><span class="ref-chip">Jiang et al. 2023</span><span class="ref-chip">Li et al. 2025</span></div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="startEdit('5');event.stopPropagation()">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="startDeleteLim('5');event.stopPropagation()">Delete</button>
+        </div>
+      </div>
+    </div>
+          
+        </div>
+        <div class="add-entry-row" onclick="addToCategory('syntax')"><span>+ add error to Syntax</span></div>
+      </div>
+      <div class="category-section" id="section-library">
+        <div class="category-header">
+          <span class="cat-header-icon">📚</span>
+          <span class="category-name">Library</span>
+          <span class="category-desc-text">Hallucinated or missing Mathlib definitions and identifiers</span>
+          <span class="category-count">1 error</span>
+        </div>
+        <div class="cards-list">
+          
+    <div class="card" id="card-7">
+      <div class="card-header" onclick="toggleCard('7')">
+        <div class="card-num">01.</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Library Hallucination</div>
+          <div class="card-tags">
+            <span class="severity-badge sev-major">Major</span>
+          </div>
+        </div>
+        <span class="card-chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Description</div>
+        <p>Models hallucinate Mathlib predicates that don't exist, causing identifier errors despite correct mathematical reasoning.</p>
+        <div class="section-label">The Issue</div><p>Lean's Mathlib is volatile and lacks formalized versions of many advanced concepts. Models default to plausible-sounding names.</p>
+        <div class="section-label">Failure Mode</div><p>Model invents predicates like IsIcosahedronSet, UniformDistrib, IsNormal — all absent from Mathlib.</p>
+        
+          <div class="section-label">Example</div>
+          <div class="example-box">
+            <div class="ex-row"><span class="ex-label">Input</span>"Let G be a normal subgroup…"</div>
+            <div class="ex-row"><span class="ex-label">Output</span><code>unknown identifier 'IsNormal'</code></div>
+          </div>
+        
+          <div class="section-label">References</div>
+          <div class="refs-list"><span class="ref-chip">ATLAS 2025</span><span class="ref-chip">Herald 2025</span><span class="ref-chip">Wang et al. 2025</span></div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="startEdit('7');event.stopPropagation()">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="startDeleteLim('7');event.stopPropagation()">Delete</button>
+        </div>
+      </div>
+    </div>
+          
+        </div>
+        <div class="add-entry-row" onclick="addToCategory('library')"><span>+ add error to Library</span></div>
+      </div>
+      <div class="category-section" id="section-evaluation">
+        <div class="category-header">
+          <span class="cat-header-icon">✓</span>
+          <span class="category-name">Evaluation</span>
+          <span class="category-desc-text">Problems in the verification/scoring pipeline itself</span>
+          <span class="category-count">1 error</span>
+        </div>
+        <div class="cards-list">
+          
+    <div class="card" id="card-2">
+      <div class="card-header" onclick="toggleCard('2')">
+        <div class="card-num">01.</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Errors in Validation Pipeline</div>
+          <div class="card-tags">
+            <span class="severity-badge sev-structural">Structural</span>
+          </div>
+        </div>
+        <span class="card-chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Description</div>
+        <p>Both syntactic and semantic validation checks can be inaccurate, producing false positives or negatives.</p>
+        <div class="section-label">The Issue</div><p>Semantic evaluation pipelines often contain LLMs which can be unexpectedly unreliable as verifiers.</p>
+        <div class="section-label">Failure Mode</div><p>False positive and false negative errors occur, inflating reported benchmark performance.</p>
+        
+          <div class="section-label">Example</div>
+          <div class="example-box">
+            <div class="ex-row"><span class="ex-label">Input</span>Automated semantic equivalence check</div>
+            <div class="ex-row"><span class="ex-label">Output</span><code>Incorrect "Pass" verdict on semantically wrong formalization.</code></div>
+          </div>
+        
+          <div class="section-label">References</div>
+          <div class="refs-list"><span class="ref-chip">Liu et al. 2024 (ASSESS)</span><span class="ref-chip">Poiroux et al. 2025</span></div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="startEdit('2');event.stopPropagation()">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="startDeleteLim('2');event.stopPropagation()">Delete</button>
+        </div>
+      </div>
+    </div>
+          
+        </div>
+        <div class="add-entry-row" onclick="addToCategory('evaluation')"><span>+ add error to Evaluation</span></div>
+      </div>
+      <div class="category-section" id="section-logic">
+        <div class="category-header">
+          <span class="cat-header-icon">∴</span>
+          <span class="category-name">Logic</span>
+          <span class="category-desc-text">Incomplete or incorrect logical encoding of a statement</span>
+          <span class="category-count">1 error</span>
+        </div>
+        <div class="cards-list">
+          
+    <div class="card" id="card-3">
+      <div class="card-header" onclick="toggleCard('3')">
+        <div class="card-num">01.</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Translation of Complex Logic</div>
+          <div class="card-tags">
+            <span class="severity-badge sev-minor">Minor</span>
+          </div>
+        </div>
+        <span class="card-chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Description</div>
+        <p>Competition-level problems contain bidirectional logic that models simplify, losing necessary converse directions.</p>
+        <div class="section-label">The Issue</div><p>Informal math contains iff constraints the LLM understands but encodes only partially.</p>
+        <div class="section-label">Failure Mode</div><p>Model formalizes only one direction of an iff, producing a strictly weaker statement.</p>
+        
+          <div class="section-label">Example</div>
+          <div class="example-box">
+            <div class="ex-row"><span class="ex-label">Input</span>Find c ∈ ℝᵏ, r &gt; 0 s.t. |x−a|=2|x−b| iff |x−c|=r. Prove 3c=4b−a and 3r=2|b−a|.</div>
+            <div class="ex-row"><span class="ex-label">Output</span><code>Formalization encodes only the → direction; ← direction is absent.</code></div>
+          </div>
+        
+          <div class="section-label">References</div>
+          <div class="refs-list"><span class="ref-chip">Herald 2025</span><span class="ref-chip">Liu et al. 2024</span><span class="ref-chip">Guo et al. 2025</span></div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="startEdit('3');event.stopPropagation()">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="startDeleteLim('3');event.stopPropagation()">Delete</button>
+        </div>
+      </div>
+    </div>
+          
+        </div>
+        <div class="add-entry-row" onclick="addToCategory('logic')"><span>+ add error to Logic</span></div>
+      </div>
+      <div class="category-section" id="section-data">
+        <div class="category-header">
+          <span class="cat-header-icon">⊞</span>
+          <span class="category-name">Data &amp; Benchmarks</span>
+          <span class="category-desc-text">Gaps between benchmark distributions and real-world complexity</span>
+          <span class="category-count">1 error</span>
+        </div>
+        <div class="cards-list">
+          
+    <div class="card" id="card-8">
+      <div class="card-header" onclick="toggleCard('8')">
+        <div class="card-num">01.</div>
+        <div class="card-title-wrap">
+          <div class="card-title">"The Wild" vs "The Lab"</div>
+          <div class="card-tags">
+            <span class="severity-badge sev-structural">Structural</span>
+          </div>
+        </div>
+        <span class="card-chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Description</div>
+        <p>Benchmarks like MiniF2F cover well-supported high-school problems. Real-world definitions (Wikipedia, arXiv) are far more demanding.</p>
+        <div class="section-label">The Issue</div><p>Wild definitions are intricate, context-dependent, and implicit — requiring extensive background theory not encoded in Mathlib.</p>
+        <div class="section-label">Failure Mode</div><p>Models tuned on MiniF2F fail on real-world definitions requiring deeply nested formal structures.</p>
+        
+          <div class="section-label">Example</div>
+          <div class="example-box">
+            <div class="ex-row"><span class="ex-label">Input</span>Arbitrary Wikipedia mathematical definition</div>
+            <div class="ex-row"><span class="ex-label">Output</span><code>Compilation failure or semantically incorrect formalization.</code></div>
+          </div>
+        
+          <div class="section-label">References</div>
+          <div class="refs-list"><span class="ref-chip">Zhang et al. 2025</span><span class="ref-chip">Li et al. 2025</span></div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="startEdit('8');event.stopPropagation()">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="startDeleteLim('8');event.stopPropagation()">Delete</button>
+        </div>
+      </div>
+    </div>
+          
+        </div>
+        <div class="add-entry-row" onclick="addToCategory('data')"><span>+ add error to Data &amp; Benchmarks</span></div>
+      </div></div>
+  </div>
+
+  <!-- ────────────────── CATEGORIES ────────────────── -->
+  <div class="view" id="view-categories">
+    <div class="page-section-header">
+      <div>
+        <div class="page-section-title">Error Categories</div>
+        <div class="page-section-subtitle">Manage the taxonomy for classifying limitations. Add new errors under any category from the Browse tab.</div>
+      </div>
+      <button class="btn btn-primary" onclick="openNewCatForm()">+ New Category</button>
+    </div>
+
+    <div class="cat-form-panel" id="catFormPanel">
+      <h3 id="catFormTitle">New Category</h3>
+      <input type="hidden" id="editCatId">
+      <div class="cat-form-grid">
+        <div class="form-field">
+          <label>Icon (emoji)</label>
+          <input type="text" id="catIcon" placeholder="e.g. 🔬">
+        </div>
+        <div class="form-field">
+          <label>Name *</label>
+          <input type="text" id="catName" placeholder="e.g. Type System">
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <button class="btn btn-primary btn-sm" onclick="saveCat()" style="white-space:nowrap;">Save</button>
+          <button class="btn btn-sm" onclick="closeCatForm()">✕</button>
+        </div>
+      </div>
+      <div class="form-field" style="margin-top:12px;">
+        <label>Description</label>
+        <input type="text" id="catDesc" placeholder="Brief description of what errors belong here">
+      </div>
+    </div>
+
+    <div class="cat-mgmt-grid" id="catMgmtList">
+      <div class="cat-mgmt-row" id="catrow-type-system">
+        <div class="cat-icon-box">⚙️</div>
+        <div class="cat-info">
+          <div class="cat-info-name">Type System</div>
+          <div class="cat-info-desc">Errors from type inference, coercions, and missing type declarations</div>
+          <div class="cat-info-meta">1 limitation · id: type-system</div>
+        </div>
+        <div class="cat-mgmt-actions">
+          <button class="icon-btn" onclick="startEditCat('type-system')">Edit</button>
+          <button class="icon-btn danger" onclick="startDeleteCat('type-system')">Delete</button>
+        </div>
+      </div>
+      <div class="cat-mgmt-row" id="catrow-semantics">
+        <div class="cat-icon-box">∿</div>
+        <div class="cat-info">
+          <div class="cat-info-name">Semantics</div>
+          <div class="cat-info-desc">Failures in preserving the mathematical meaning of a statement</div>
+          <div class="cat-info-meta">3 limitations · id: semantics</div>
+        </div>
+        <div class="cat-mgmt-actions">
+          <button class="icon-btn" onclick="startEditCat('semantics')">Edit</button>
+          <button class="icon-btn danger" onclick="startDeleteCat('semantics')">Delete</button>
+        </div>
+      </div>
+      <div class="cat-mgmt-row" id="catrow-syntax">
+        <div class="cat-icon-box">{ }</div>
+        <div class="cat-info">
+          <div class="cat-info-name">Syntax</div>
+          <div class="cat-info-desc">Structural incompatibility with Lean 4 syntax rules</div>
+          <div class="cat-info-meta">1 limitation · id: syntax</div>
+        </div>
+        <div class="cat-mgmt-actions">
+          <button class="icon-btn" onclick="startEditCat('syntax')">Edit</button>
+          <button class="icon-btn danger" onclick="startDeleteCat('syntax')">Delete</button>
+        </div>
+      </div>
+      <div class="cat-mgmt-row" id="catrow-library">
+        <div class="cat-icon-box">📚</div>
+        <div class="cat-info">
+          <div class="cat-info-name">Library</div>
+          <div class="cat-info-desc">Hallucinated or missing Mathlib definitions and identifiers</div>
+          <div class="cat-info-meta">1 limitation · id: library</div>
+        </div>
+        <div class="cat-mgmt-actions">
+          <button class="icon-btn" onclick="startEditCat('library')">Edit</button>
+          <button class="icon-btn danger" onclick="startDeleteCat('library')">Delete</button>
+        </div>
+      </div>
+      <div class="cat-mgmt-row" id="catrow-evaluation">
+        <div class="cat-icon-box">✓</div>
+        <div class="cat-info">
+          <div class="cat-info-name">Evaluation</div>
+          <div class="cat-info-desc">Problems in the verification/scoring pipeline itself</div>
+          <div class="cat-info-meta">1 limitation · id: evaluation</div>
+        </div>
+        <div class="cat-mgmt-actions">
+          <button class="icon-btn" onclick="startEditCat('evaluation')">Edit</button>
+          <button class="icon-btn danger" onclick="startDeleteCat('evaluation')">Delete</button>
+        </div>
+      </div>
+      <div class="cat-mgmt-row" id="catrow-logic">
+        <div class="cat-icon-box">∴</div>
+        <div class="cat-info">
+          <div class="cat-info-name">Logic</div>
+          <div class="cat-info-desc">Incomplete or incorrect logical encoding of a statement</div>
+          <div class="cat-info-meta">1 limitation · id: logic</div>
+        </div>
+        <div class="cat-mgmt-actions">
+          <button class="icon-btn" onclick="startEditCat('logic')">Edit</button>
+          <button class="icon-btn danger" onclick="startDeleteCat('logic')">Delete</button>
+        </div>
+      </div>
+      <div class="cat-mgmt-row" id="catrow-data">
+        <div class="cat-icon-box">⊞</div>
+        <div class="cat-info">
+          <div class="cat-info-name">Data &amp; Benchmarks</div>
+          <div class="cat-info-desc">Gaps between benchmark distributions and real-world complexity</div>
+          <div class="cat-info-meta">1 limitation · id: data</div>
+        </div>
+        <div class="cat-mgmt-actions">
+          <button class="icon-btn" onclick="startEditCat('data')">Edit</button>
+          <button class="icon-btn danger" onclick="startDeleteCat('data')">Delete</button>
+        </div>
+      </div></div>
+  </div>
+
+  <!-- ────────────────── ADD / EDIT LIMITATION ────────────────── -->
+  <div class="view" id="view-add">
+    <div class="form-panel">
+      <h2 id="formTitle">Add a New Limitation</h2>
+      <input type="hidden" id="editId">
+      <div class="form-grid">
+        <div class="form-field full">
+          <label>Title *</label>
+          <input type="text" id="fTitle" placeholder="e.g. Library Hallucination">
+        </div>
+        <div class="form-field full">
+          <label>Short Description *</label>
+          <textarea id="fDesc" rows="3" placeholder="Describe the limitation in 1–3 sentences…"></textarea>
+        </div>
+        <div class="form-field full">
+          <label>The Issue</label>
+          <textarea id="fIssue" rows="2" placeholder="What specific problem occurs in the pipeline?"></textarea>
+        </div>
+        <div class="form-field full">
+          <label>Failure Mode</label>
+          <textarea id="fFailure" rows="2" placeholder="How does this manifest as an error?"></textarea>
+        </div>
+        <div class="form-field">
+          <label>Example Input</label>
+          <input type="text" id="fExInput" placeholder="e.g. " let="" x="" be="" a="" number…""="">
+        </div>
+        <div class="form-field">
+          <label>Example Output / Error</label>
+          <input type="text" id="fExOutput" placeholder="e.g. (x : Float) …">
+        </div>
+        <div class="form-field">
+          <label>Severity</label>
+          <select id="fSeverity">
+            <option value="major">Major</option>
+            <option value="minor">Minor</option>
+            <option value="structural">Structural</option>
+            <option value="open">Open Question</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Category</label>
+          <select id="fCategory"><option value="type-system">Type System</option><option value="semantics">Semantics</option><option value="syntax">Syntax</option><option value="library">Library</option><option value="evaluation">Evaluation</option><option value="logic">Logic</option><option value="data">Data &amp; Benchmarks</option></select>
+        </div>
+        <div class="form-field full">
+          <label>References (comma-separated)</label>
+          <input type="text" id="fRefs" placeholder="e.g. Herald 2025, PutnamBench 2024">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="saveEntry()">Save Limitation</button>
+        <button class="btn" onclick="cancelEdit()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────────────── STATS ────────────────── -->
+  <div class="view" id="view-stats">
+    <div class="stats-grid" id="statsGrid">
+    <div class="stat-card"><div class="stat-num">9</div><div class="stat-label">Total Limitations</div></div>
+    <div class="stat-card"><div class="stat-num">7</div><div class="stat-label">Categories</div></div>
+    <div class="stat-card"><div class="stat-num">4</div><div class="stat-label">Major</div></div>
+    <div class="stat-card"><div class="stat-num">4</div><div class="stat-label">Structural</div></div>
+  </div>
+    <hr class="section-rule">
+    <div class="dist-section-title">Severity Distribution</div>
+    <div id="sevDist" style="margin-bottom:32px;">
+        <div class="dist-row">
+          <div class="dist-key">major</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:44%;background:#8b2020"></div></div>
+          <div class="dist-count">4</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-key">structural</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:44%;background:#5b21b6"></div></div>
+          <div class="dist-count">4</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-key">minor</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:11%;background:#92400e"></div></div>
+          <div class="dist-count">1</div>
+        </div></div>
+    <div class="dist-section-title">By Category</div>
+    <div id="catDist"><div class="dist-row">
+          <div class="dist-key">⚙️ Type System</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:11%"></div></div>
+          <div class="dist-count">1</div>
+        </div><div class="dist-row">
+          <div class="dist-key">∿ Semantics</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:33%"></div></div>
+          <div class="dist-count">3</div>
+        </div><div class="dist-row">
+          <div class="dist-key">{ } Syntax</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:11%"></div></div>
+          <div class="dist-count">1</div>
+        </div><div class="dist-row">
+          <div class="dist-key">📚 Library</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:11%"></div></div>
+          <div class="dist-count">1</div>
+        </div><div class="dist-row">
+          <div class="dist-key">✓ Evaluation</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:11%"></div></div>
+          <div class="dist-count">1</div>
+        </div><div class="dist-row">
+          <div class="dist-key">∴ Logic</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:11%"></div></div>
+          <div class="dist-count">1</div>
+        </div><div class="dist-row">
+          <div class="dist-key">⊞ Data &amp; Benchmarks</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:11%"></div></div>
+          <div class="dist-count">1</div>
+        </div></div>
+  </div>
+
+</main>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <h2 id="deleteModalTitle">Delete?</h2>
+    <p id="deleteModalBody">This cannot be undone.</p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn" style="background:#8b2020;color:white;border-color:#8b2020;" onclick="confirmDelete()">Delete</button>
+      <button class="btn" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STORAGE  (localStorage — works on any host)
+// ═══════════════════════════════════════════════
+const SK_L = 'autoform-lims-v3';
+const SK_C = 'autoform-cats-v3';
+
+async function loadAll() {
+  const get = k => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } };
+  return { lims: get(SK_L), cats: get(SK_C) };
+}
+
+async function persistAll() {
+  try {
+    localStorage.setItem(SK_L, JSON.stringify(limitations));
+    localStorage.setItem(SK_C, JSON.stringify(categories));
+  } catch(e) { console.error(e); }
+}
+
+// ═══════════════════════════════════════════════
+// DEFAULT DATA
+// ═══════════════════════════════════════════════
+const defaultCategories = [
+  {
+    "id": "type-system",
+    "name": "Type System",
+    "desc": "Errors from type inference, coercions, and missing type declarations",
+    "icon": "⚙️"
+  },
+  {
+    "id": "semantics",
+    "name": "Semantics",
+    "desc": "Failures in preserving the mathematical meaning of a statement",
+    "icon": "∿"
+  },
+  {
+    "id": "syntax",
+    "name": "Syntax",
+    "desc": "Structural incompatibility with Lean 4 syntax rules",
+    "icon": "{ }"
+  },
+  {
+    "id": "library",
+    "name": "Library",
+    "desc": "Hallucinated or missing Mathlib definitions and identifiers",
+    "icon": "📚"
+  },
+  {
+    "id": "evaluation",
+    "name": "Evaluation",
+    "desc": "Problems in the verification/scoring pipeline itself",
+    "icon": "✓"
+  },
+  {
+    "id": "logic",
+    "name": "Logic",
+    "desc": "Incomplete or incorrect logical encoding of a statement",
+    "icon": "∴"
+  },
+  {
+    "id": "data",
+    "name": "Data & Benchmarks",
+    "desc": "Gaps between benchmark distributions and real-world complexity",
+    "icon": "⊞"
+  }
+];
+
+const defaultLimitations = [
+  {
+    "id": "1",
+    "title": "The Translation Paradox",
+    "desc": "Informal mathematics relies on high-context ambiguity; formal mathematics requires zero-ambiguity type precision.",
+    "issue": "Human writers omit type declarations — \"Let n be a number\" implies n ∈ ℕ or n ∈ ℝ depending on context.",
+    "failure": "Model infers types stochastically, guessing Float for reals or Int for naturals, causing cascading type mismatch errors.",
+    "exInput": "\"Let x be a number…\"",
+    "exOutput": "(x : Float) … → Compiler Error: expected Set ℝ, got Float.",
+    "severity": "major",
+    "category": "type-system",
+    "refs": [
+      "Tarrach et al. 2024",
+      "Wu et al. 2025"
+    ]
+  },
+  {
+    "id": "2",
+    "title": "Errors in Validation Pipeline",
+    "desc": "Both syntactic and semantic validation checks can be inaccurate, producing false positives or negatives.",
+    "issue": "Semantic evaluation pipelines often contain LLMs which can be unexpectedly unreliable as verifiers.",
+    "failure": "False positive and false negative errors occur, inflating reported benchmark performance.",
+    "exInput": "Automated semantic equivalence check",
+    "exOutput": "Incorrect \"Pass\" verdict on semantically wrong formalization.",
+    "severity": "structural",
+    "category": "evaluation",
+    "refs": [
+      "Liu et al. 2024 (ASSESS)",
+      "Poiroux et al. 2025"
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Translation of Complex Logic",
+    "desc": "Competition-level problems contain bidirectional logic that models simplify, losing necessary converse directions.",
+    "issue": "Informal math contains iff constraints the LLM understands but encodes only partially.",
+    "failure": "Model formalizes only one direction of an iff, producing a strictly weaker statement.",
+    "exInput": "Find c ∈ ℝᵏ, r > 0 s.t. |x−a|=2|x−b| iff |x−c|=r. Prove 3c=4b−a and 3r=2|b−a|.",
+    "exOutput": "Formalization encodes only the → direction; ← direction is absent.",
+    "severity": "minor",
+    "category": "logic",
+    "refs": [
+      "Herald 2025",
+      "Liu et al. 2024",
+      "Guo et al. 2025"
+    ]
+  },
+  {
+    "id": "4",
+    "title": "Dimensional Misalignment",
+    "desc": "Models correctly identify algebraic structures but fail to capture dimensionality, producing valid code formalizing a different problem.",
+    "issue": "Notation ℚ[x,y] vs ℚ[x] provides minimal visual distinction but a critical semantic difference.",
+    "failure": "Model defaults to univariate Polynomial instead of MvPolynomial (Fin 2), treating Y as a constant coefficient.",
+    "exInput": "\"Prove that x²+y²−1 is irreducible in ℚ[x,y].\"",
+    "exOutput": "Irreducible (X²+Y²−1 : Polynomial ℚ) := sorry",
+    "severity": "major",
+    "category": "semantics",
+    "refs": [
+      "Herald 2025",
+      "Lu et al. 2025"
+    ]
+  },
+  {
+    "id": "5",
+    "title": "Definition Bottleneck",
+    "desc": "Fundamental conflict between the imperative flow of natural language and the declarative structure of dependent type theory.",
+    "issue": "Informal math defines objects linearly. Formal systems require dependency injection or hypothesis lifting.",
+    "failure": "Models insert let bindings into theorem signatures, syntactically illegal in Lean 4.",
+    "exInput": "\"First let x = 5, now consider f(x)…\"",
+    "exOutput": "Syntax error: expected ';' or unexpected token 'let'.",
+    "severity": "structural",
+    "category": "syntax",
+    "refs": [
+      "Jiang et al. 2023",
+      "Li et al. 2025"
+    ]
+  },
+  {
+    "id": "6",
+    "title": "Semantic Drift — Tautology Trap",
+    "desc": "Models optimize for token likelihood, generating valid code that is mathematically trivial compared to the intended statement.",
+    "issue": "Complex geometric predicates are statistically rare; simple tautologies are statistically common in training data.",
+    "failure": "Model rewrites \"Show four points form a convex quadrilateral\" as \"The convex hull of four points is convex\" — a tautology.",
+    "exInput": "\"Show that four points form a convex quadrilateral.\"",
+    "exOutput": "\"Show that the convex hull of four points is convex.\" (tautology)",
+    "severity": "major",
+    "category": "semantics",
+    "refs": [
+      "PutnamBench 2024",
+      "Liu et al. 2024"
+    ]
+  },
+  {
+    "id": "7",
+    "title": "Library Hallucination",
+    "desc": "Models hallucinate Mathlib predicates that don't exist, causing identifier errors despite correct mathematical reasoning.",
+    "issue": "Lean's Mathlib is volatile and lacks formalized versions of many advanced concepts. Models default to plausible-sounding names.",
+    "failure": "Model invents predicates like IsIcosahedronSet, UniformDistrib, IsNormal — all absent from Mathlib.",
+    "exInput": "\"Let G be a normal subgroup…\"",
+    "exOutput": "unknown identifier 'IsNormal'",
+    "severity": "major",
+    "category": "library",
+    "refs": [
+      "ATLAS 2025",
+      "Herald 2025",
+      "Wang et al. 2025"
+    ]
+  },
+  {
+    "id": "8",
+    "title": "\"The Wild\" vs \"The Lab\"",
+    "desc": "Benchmarks like MiniF2F cover well-supported high-school problems. Real-world definitions (Wikipedia, arXiv) are far more demanding.",
+    "issue": "Wild definitions are intricate, context-dependent, and implicit — requiring extensive background theory not encoded in Mathlib.",
+    "failure": "Models tuned on MiniF2F fail on real-world definitions requiring deeply nested formal structures.",
+    "exInput": "Arbitrary Wikipedia mathematical definition",
+    "exOutput": "Compilation failure or semantically incorrect formalization.",
+    "severity": "structural",
+    "category": "data",
+    "refs": [
+      "Zhang et al. 2025",
+      "Li et al. 2025"
+    ]
+  },
+  {
+    "id": "9",
+    "title": "Implicit Knowledge Gap",
+    "desc": "Human textbooks omit steps \"obvious\" to readers that formal compilers strictly require, causing missing type class instance errors.",
+    "issue": "Proofs say \"it is trivial to see that X is a group\" — the implicit prerequisite is absent from the source text.",
+    "failure": "Lean 4 rejects code because a type class instance (proof that something is a group) is missing from the dependency graph.",
+    "exInput": "\"It is trivial to see that X is a group…\"",
+    "exOutput": "failed to synthesize instance Group X",
+    "severity": "structural",
+    "category": "semantics",
+    "refs": [
+      "Tarrach et al. 2024",
+      "Wu et al. 2025"
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let limitations = [];
+let categories  = [];
+let pendingDeleteId   = null;
+let pendingDeleteType = null;
+
+async function init() {
+  const { lims, cats } = await loadAll();
+  categories  = cats  || defaultCategories;
+  limitations = lims  || defaultLimitations;
+  if (!cats || !lims) await persistAll();
+  renderAll();
+}
+
+function renderAll() {
+  renderBrowse();
+  renderCatMgmt();
+  populateCatSelect();
+  renderStats();
+  const n = limitations.length, c = categories.length;
+  document.getElementById('totalBadge').textContent =
+    `${n} limitation${n!==1?'s':''} · ${c} categor${c!==1?'ies':'y'}`;
+  document.getElementById('lastUpdated').textContent =
+    new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+}
+
+// ═══════════════════════════════════════════════
+// BROWSE
+// ═══════════════════════════════════════════════
+const SEV_CLASS = { major:'sev-major', minor:'sev-minor', structural:'sev-structural', open:'sev-open' };
+const SEV_LABEL = { major:'Major', minor:'Minor', structural:'Structural', open:'Open Question' };
+
+function cardHTML(l, i) {
+  return `
+    <div class="card" id="card-${l.id}">
+      <div class="card-header" onclick="toggleCard('${l.id}')">
+        <div class="card-num">${String(i+1).padStart(2,'0')}.</div>
+        <div class="card-title-wrap">
+          <div class="card-title">${l.title}</div>
+          <div class="card-tags">
+            <span class="severity-badge ${SEV_CLASS[l.severity]||'sev-minor'}">${SEV_LABEL[l.severity]||l.severity}</span>
+          </div>
+        </div>
+        <span class="card-chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Description</div>
+        <p>${l.desc}</p>
+        ${l.issue   ? `<div class="section-label">The Issue</div><p>${l.issue}</p>` : ''}
+        ${l.failure ? `<div class="section-label">Failure Mode</div><p>${l.failure}</p>` : ''}
+        ${l.exInput||l.exOutput ? `
+          <div class="section-label">Example</div>
+          <div class="example-box">
+            ${l.exInput  ? `<div class="ex-row"><span class="ex-label">Input</span>${l.exInput}</div>`         : ''}
+            ${l.exOutput ? `<div class="ex-row"><span class="ex-label">Output</span><code>${l.exOutput}</code></div>` : ''}
+          </div>` : ''}
+        ${l.refs&&l.refs.length ? `
+          <div class="section-label">References</div>
+          <div class="refs-list">${l.refs.map(r=>`<span class="ref-chip">${r}</span>`).join('')}</div>` : ''}
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="startEdit('${l.id}');event.stopPropagation()">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="startDeleteLim('${l.id}');event.stopPropagation()">Delete</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderBrowse() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const container = document.getElementById('browseContent');
+  const knownIds = new Set(categories.map(c => c.id));
+  let html = '';
+
+  categories.forEach(cat => {
+    let items = limitations.filter(l => l.category === cat.id);
+    const allCount = items.length;
+    if (q) items = items.filter(l =>
+      l.title.toLowerCase().includes(q) || l.desc.toLowerCase().includes(q) ||
+      cat.name.toLowerCase().includes(q)
+    );
+    if (q && items.length === 0) return;
+
+    html += `
+      <div class="category-section" id="section-${cat.id}">
+        <div class="category-header">
+          <span class="cat-header-icon">${cat.icon||'◆'}</span>
+          <span class="category-name">${cat.name}</span>
+          ${cat.desc ? `<span class="category-desc-text">${cat.desc}</span>` : ''}
+          <span class="category-count">${allCount} error${allCount!==1?'s':''}</span>
+        </div>
+        <div class="cards-list">
+          ${items.map((l,i) => cardHTML(l,i)).join('')}
+          ${items.length===0 && !q ? `<div class="cat-empty">No errors recorded in this category yet.</div>` : ''}
+        </div>
+        ${!q ? `<div class="add-entry-row" onclick="addToCategory('${cat.id}')"><span>+ add error to ${cat.name}</span></div>` : ''}
+      </div>`;
+  });
+
+  // Orphans (category deleted)
+  const orphans = limitations.filter(l => !knownIds.has(l.category));
+  if (orphans.length > 0) {
+    const filtered = q ? orphans.filter(l => l.title.toLowerCase().includes(q)||l.desc.toLowerCase().includes(q)) : orphans;
+    if (filtered.length > 0) {
+      html += `
+        <div class="category-section">
+          <div class="category-header">
+            <span class="category-name" style="color:var(--ink-light)">Uncategorised</span>
+            <span class="category-count">${filtered.length} error${filtered.length!==1?'s':''}</span>
+          </div>
+          <div class="cards-list">${filtered.map((l,i) => cardHTML(l,i)).join('')}</div>
+        </div>`;
+    }
+  }
+
+  container.innerHTML = html || `<div class="empty-global">No limitations match your search.</div>`;
+}
+
+function toggleCard(id) {
+  document.getElementById('card-'+id)?.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════
+// CATEGORY MANAGEMENT
+// ═══════════════════════════════════════════════
+function renderCatMgmt() {
+  const list = document.getElementById('catMgmtList');
+  if (!categories.length) {
+    list.innerHTML = '<div class="empty-global">No categories yet. Create one above.</div>';
+    return;
+  }
+  list.innerHTML = categories.map(cat => {
+    const n = limitations.filter(l => l.category === cat.id).length;
+    return `
+      <div class="cat-mgmt-row" id="catrow-${cat.id}">
+        <div class="cat-icon-box">${cat.icon||'◆'}</div>
+        <div class="cat-info">
+          <div class="cat-info-name">${cat.name}</div>
+          ${cat.desc ? `<div class="cat-info-desc">${cat.desc}</div>` : ''}
+          <div class="cat-info-meta">${n} limitation${n!==1?'s':''} · id: ${cat.id}</div>
+        </div>
+        <div class="cat-mgmt-actions">
+          <button class="icon-btn" onclick="startEditCat('${cat.id}')">Edit</button>
+          <button class="icon-btn danger" onclick="startDeleteCat('${cat.id}')">Delete</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function populateCatSelect() {
+  const sel = document.getElementById('fCategory');
+  const cur = sel.value;
+  sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  if (cur && categories.find(c => c.id === cur)) sel.value = cur;
+}
+
+function openNewCatForm() {
+  document.getElementById('catFormTitle').textContent = 'New Category';
+  document.getElementById('editCatId').value = '';
+  document.getElementById('catName').value  = '';
+  document.getElementById('catDesc').value  = '';
+  document.getElementById('catIcon').value  = '';
+  const f = document.getElementById('catFormPanel');
+  f.classList.add('open');
+  document.getElementById('catName').focus();
+}
+
+function startEditCat(id) {
+  const cat = categories.find(c => c.id === id);
+  if (!cat) return;
+  document.getElementById('catFormTitle').textContent = 'Edit Category';
+  document.getElementById('editCatId').value = id;
+  document.getElementById('catName').value   = cat.name;
+  document.getElementById('catDesc').value   = cat.desc||'';
+  document.getElementById('catIcon').value   = cat.icon||'';
+  document.getElementById('catFormPanel').classList.add('open');
+  document.getElementById('catFormPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeCatForm() {
+  document.getElementById('catFormPanel').classList.remove('open');
+}
+
+async function saveCat() {
+  const name = document.getElementById('catName').value.trim();
+  if (!name) { alert('Name is required.'); return; }
+  const editId = document.getElementById('editCatId').value;
+  const id = editId || name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
+  const cat = { id, name, desc: document.getElementById('catDesc').value.trim(), icon: document.getElementById('catIcon').value.trim() || '◆' };
+
+  if (editId) {
+    const idx = categories.findIndex(c => c.id === editId);
+    if (idx > -1) categories[idx] = cat;
+  } else {
+    if (categories.find(c => c.id === id)) { alert('A category with this name already exists.'); return; }
+    categories.push(cat);
+  }
+  await persistAll();
+  closeCatForm();
+  renderAll();
+}
+
+function startDeleteCat(id) {
+  const cat = categories.find(c => c.id === id);
+  const n   = limitations.filter(l => l.category === id).length;
+  pendingDeleteId   = id;
+  pendingDeleteType = 'category';
+  document.getElementById('deleteModalTitle').textContent = `Delete "${cat?.name}"?`;
+  document.getElementById('deleteModalBody').textContent  = n > 0
+    ? `This category has ${n} limitation${n!==1?'s':''}. They will become uncategorised (you can reassign them later). This cannot be undone.`
+    : 'This category is empty. This cannot be undone.';
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════
+// LIMITATION CRUD
+// ═══════════════════════════════════════════════
+function switchTab(btn, tab) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab !== 'add') cancelEdit();
+}
+
+function addToCategory(catId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-add').classList.add('active');
+  document.querySelector('[data-tab="add"]').classList.add('active');
+  cancelEdit();
+  document.getElementById('fCategory').value = catId;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function startEdit(id) {
+  const l = limitations.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('formTitle').textContent   = 'Edit Limitation';
+  document.getElementById('editId').value            = id;
+  document.getElementById('fTitle').value            = l.title;
+  document.getElementById('fDesc').value             = l.desc;
+  document.getElementById('fIssue').value            = l.issue   || '';
+  document.getElementById('fFailure').value          = l.failure || '';
+  document.getElementById('fExInput').value          = l.exInput  || '';
+  document.getElementById('fExOutput').value         = l.exOutput || '';
+  document.getElementById('fSeverity').value         = l.severity;
+  document.getElementById('fCategory').value         = l.category;
+  document.getElementById('fRefs').value             = (l.refs||[]).join(', ');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-add').classList.add('active');
+  document.querySelector('[data-tab="add"]').classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function cancelEdit() {
+  document.getElementById('formTitle').textContent = 'Add a New Limitation';
+  document.getElementById('editId').value = '';
+  ['fTitle','fDesc','fIssue','fFailure','fExInput','fExOutput','fRefs'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fSeverity').value = 'major';
+  if (categories.length) document.getElementById('fCategory').value = categories[0].id;
+}
+
+async function saveEntry() {
+  const title = document.getElementById('fTitle').value.trim();
+  const desc  = document.getElementById('fDesc').value.trim();
+  if (!title || !desc) { alert('Title and description are required.'); return; }
+  const editId = document.getElementById('editId').value;
+  const entry = {
+    id: editId || Date.now().toString(),
+    title, desc,
+    issue:    document.getElementById('fIssue').value.trim(),
+    failure:  document.getElementById('fFailure').value.trim(),
+    exInput:  document.getElementById('fExInput').value.trim(),
+    exOutput: document.getElementById('fExOutput').value.trim(),
+    severity: document.getElementById('fSeverity').value,
+    category: document.getElementById('fCategory').value,
+    refs:     document.getElementById('fRefs').value.split(',').map(s=>s.trim()).filter(Boolean)
+  };
+  if (editId) {
+    const idx = limitations.findIndex(l => l.id === editId);
+    if (idx > -1) limitations[idx] = entry;
+  } else {
+    limitations.push(entry);
+  }
+  await persistAll();
+  cancelEdit();
+  renderAll();
+  // Go back to browse and scroll to category
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-browse').classList.add('active');
+  document.querySelector('[data-tab="browse"]').classList.add('active');
+  setTimeout(() => document.getElementById('section-'+entry.category)?.scrollIntoView({behavior:'smooth',block:'start'}), 100);
+}
+
+function startDeleteLim(id) {
+  const l = limitations.find(x => x.id === id);
+  pendingDeleteId   = id;
+  pendingDeleteType = 'limitation';
+  document.getElementById('deleteModalTitle').textContent = `Delete "${l?.title}"?`;
+  document.getElementById('deleteModalBody').textContent  = 'This action cannot be undone.';
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+async function confirmDelete() {
+  if (pendingDeleteType === 'limitation') {
+    limitations = limitations.filter(l => l.id !== pendingDeleteId);
+  } else {
+    categories = categories.filter(c => c.id !== pendingDeleteId);
+    // limitations with that category become orphans — intentionally kept
+  }
+  await persistAll();
+  closeModal();
+  renderAll();
+}
+
+function closeModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  pendingDeleteId = null;
+  pendingDeleteType = null;
+}
+
+// ═══════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════
+function renderStats() {
+  const total = limitations.length;
+  const sev = {}, cat = {};
+  limitations.forEach(l => {
+    sev[l.severity] = (sev[l.severity]||0) + 1;
+    cat[l.category] = (cat[l.category]||0) + 1;
+  });
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total Limitations</div></div>
+    <div class="stat-card"><div class="stat-num">${categories.length}</div><div class="stat-label">Categories</div></div>
+    <div class="stat-card"><div class="stat-num">${sev.major||0}</div><div class="stat-label">Major</div></div>
+    <div class="stat-card"><div class="stat-num">${sev.structural||0}</div><div class="stat-label">Structural</div></div>
+  `;
+
+  const sevColors = { major:'#8b2020', minor:'#92400e', structural:'#5b21b6', open:'#166534' };
+  document.getElementById('sevDist').innerHTML = !total
+    ? '<div style="color:var(--ink-faint);font-size:14px;">No data yet.</div>'
+    : Object.entries(sev).map(([k,v]) => `
+        <div class="dist-row">
+          <div class="dist-key">${k}</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:${(v/total*100).toFixed(0)}%;background:${sevColors[k]||'#888'}"></div></div>
+          <div class="dist-count">${v}</div>
+        </div>`).join('');
+
+  document.getElementById('catDist').innerHTML = !total
+    ? '<div style="color:var(--ink-faint);font-size:14px;">No data yet.</div>'
+    : categories.map(c => {
+        const v = cat[c.id]||0;
+        return `<div class="dist-row">
+          <div class="dist-key">${c.icon||'◆'} ${c.name}</div>
+          <div class="dist-bar-wrap"><div class="dist-bar" style="width:${(v/total*100).toFixed(0)}%"></div></div>
+          <div class="dist-count">${v}</div>
+        </div>`;
+      }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// EXPORT — bake current data into a new HTML file
+// ═══════════════════════════════════════════════
+function exportHTML() {
+  // Get the full current page source and replace the default seed data
+  // with the live in-memory state, so the exported file is self-contained.
+  let src = document.documentElement.outerHTML;
+
+  // Replace defaultLimitations and defaultCategories with current live data
+  const limJSON  = JSON.stringify(limitations,  null, 2);
+  const catJSON  = JSON.stringify(categories,   null, 2);
+
+  src = src.replace(
+    /const defaultCategories = \[[\s\S]*?\];(?=\s*\nconst defaultLimitations)/,
+    `const defaultCategories = ${catJSON};`
+  );
+  src = src.replace(
+    /const defaultLimitations = \[[\s\S]*?\];(?=\s*\n\/\/ ═)/,
+    `const defaultLimitations = ${limJSON};`
+  );
+
+  const blob = new Blob([src], { type: 'text/html' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'autoformalization-limitations.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+init();
+</script>
+
+
+</body></html>
