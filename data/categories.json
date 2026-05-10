@@ -1,0 +1,9 @@
+[
+  { "id": "type-system",  "name": "Type System",       "icon": "⚙️", "desc": "Errors from type inference, coercions, and missing type declarations" },
+  { "id": "semantics",    "name": "Semantics",          "icon": "∿",  "desc": "Failures in preserving the mathematical meaning of a statement" },
+  { "id": "syntax",       "name": "Syntax",             "icon": "{}",  "desc": "Structural incompatibility with Lean 4 syntax rules" },
+  { "id": "library",      "name": "Library",            "icon": "📚", "desc": "Hallucinated or missing Mathlib definitions and identifiers" },
+  { "id": "evaluation",   "name": "Evaluation",         "icon": "✓",  "desc": "Problems in the verification and scoring pipeline itself" },
+  { "id": "logic",        "name": "Logic",              "icon": "∴",  "desc": "Incomplete or incorrect logical encoding of a statement" },
+  { "id": "data",         "name": "Data & Benchmarks",  "icon": "⊞",  "desc": "Gaps between benchmark distributions and real-world complexity" }
+]

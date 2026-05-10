@@ -1,0 +1,38 @@
+[
+  {
+    "id": "cl-1",
+    "date": "2026-02-21",
+    "type": "report",
+    "title": "Initial limitation report published",
+    "body": "Nine critical failure modes identified for neural-symbolic autoformalization on complex mathematics (Putnam-level). Categories established: Type System, Semantics, Syntax, Library, Evaluation, Logic, Data & Benchmarks.",
+    "linkedPapers": [],
+    "linkedLimitations": ["1","2","3","4","5","6","7","8","9"]
+  },
+  {
+    "id": "cl-2",
+    "date": "2025-10-01",
+    "type": "progress",
+    "title": "ATLAS partially addresses library hallucination",
+    "body": "Liu et al. propose data lifting — reverse-engineering natural language from valid Mathlib code — to reduce hallucinated identifier errors. Coverage of advanced Mathlib concepts improves but does not eliminate the gap for concepts not yet formalized.",
+    "linkedPapers": ["atlas-2025"],
+    "linkedLimitations": ["7"]
+  },
+  {
+    "id": "cl-3",
+    "date": "2025-10-15",
+    "type": "progress",
+    "title": "Improved evaluation reliability via ASSESS and Poiroux et al.",
+    "body": "Two concurrent works tackle the unreliable validation pipeline problem. ASSESS introduces a semantic and structural similarity framework; Poiroux et al. propose robust benchmarking methodology. Both reduce false positive rates substantially.",
+    "linkedPapers": ["liu-2024-assess", "poiroux-2025"],
+    "linkedLimitations": ["2"]
+  },
+  {
+    "id": "cl-4",
+    "date": "2024-11-01",
+    "type": "new-finding",
+    "title": "PutnamBench exposes semantic drift at competition level",
+    "body": "Tsoukalas et al. demonstrate that state-of-the-art models systematically replace complex geometric predicates with tautological equivalents when formalizing Putnam problems, introducing the concept of the \"Tautology Trap\" as a distinct failure mode.",
+    "linkedPapers": ["putnam-2024"],
+    "linkedLimitations": ["6"]
+  }
+]

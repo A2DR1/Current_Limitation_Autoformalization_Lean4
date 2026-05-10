@@ -1,0 +1,80 @@
+[
+  {
+    "id": "jiang-2023",
+    "title": "Draft, Sketch, and Prove: Guiding Formal Theorem Provers with Informal Proofs",
+    "authors": "Albert Q. Jiang, Sean Welleck, Jin Peng Zhou, et al.",
+    "year": 2023,
+    "month": 2,
+    "venue": "ICLR 2023",
+    "url": "",
+    "summary": "Proposes separating high-level informal reasoning from low-level formal syntax via a three-stage pipeline: draft an informal proof, sketch a formal skeleton, then prove each step. Acknowledges that direct translation produces invalid let bindings in theorem signatures.",
+    "addresses": ["5"],
+    "introduces": [],
+    "tags": ["pipeline", "informal-to-formal", "lean4"]
+  },
+  {
+    "id": "herald-2025",
+    "title": "Herald: A Natural Language Annotated Lean 4 Dataset",
+    "authors": "Guoxiong Gao, Yutong Wang, Jiedong Jiang, et al.",
+    "year": 2025,
+    "month": 2,
+    "venue": "Preprint",
+    "url": "",
+    "summary": "Introduces a large Lean 4 dataset with natural language annotations. Categorizes formalization errors, identifying dimensional misalignment as a major error class and complex logic translation as a minor error class.",
+    "addresses": ["3", "4"],
+    "introduces": [],
+    "tags": ["dataset", "lean4", "error-taxonomy"]
+  },
+  {
+    "id": "atlas-2025",
+    "title": "ATLAS: Autoformalizing Theorems through Lifting, Augmentation, and Synthesis of Data",
+    "authors": "Xiaoyang Liu, Kangjie Bao, Jiashuo Zhang, et al.",
+    "year": 2025,
+    "month": 10,
+    "venue": "Preprint",
+    "url": "",
+    "summary": "Addresses library hallucination by reverse-engineering natural language from valid Mathlib code (data lifting). Proves that previous approaches suffered critically from hallucinated library definitions. Proposes augmentation and synthesis to fill Mathlib coverage gaps.",
+    "addresses": ["7"],
+    "introduces": [],
+    "tags": ["data-augmentation", "mathlib", "hallucination"]
+  },
+  {
+    "id": "putnam-2024",
+    "title": "PutnamBench: Evaluating Neural Theorem-Provers on the Putnam Mathematical Competition",
+    "authors": "George Tsoukalas, Jasper Lee, John Jennings, et al.",
+    "year": 2024,
+    "month": 11,
+    "venue": "NeurIPS 2024",
+    "url": "",
+    "summary": "Introduces PutnamBench, a benchmark of competition-level problems. Finds that models frequently simplify complex geometric predicates into tautological statements to maximize generation probability, exposing the semantic drift problem.",
+    "addresses": [],
+    "introduces": ["6"],
+    "tags": ["benchmark", "competition-math", "evaluation"]
+  },
+  {
+    "id": "liu-2024-assess",
+    "title": "ASSESS: A Semantic and Structural Evaluation Framework for Statement Similarity",
+    "authors": "Xiaoyang Liu, Tao Zhu, Zineng Dong, et al.",
+    "year": 2026,
+    "month": 2,
+    "venue": "Preprint",
+    "url": "",
+    "summary": "Proposes a more reliable evaluation framework for autoformalization, addressing the problem of LLM-based semantic checkers producing false positives and negatives.",
+    "addresses": ["2"],
+    "introduces": [],
+    "tags": ["evaluation", "semantic-similarity", "benchmarking"]
+  },
+  {
+    "id": "poiroux-2025",
+    "title": "Reliable Evaluation and Benchmarks for Statement Autoformalization",
+    "authors": "Auguste Poiroux, Gail Weiss, Viktor Kunčak, Antoine Bosselut",
+    "year": 2025,
+    "month": 10,
+    "venue": "Preprint",
+    "url": "",
+    "summary": "Systematically analyzes the reliability of existing evaluation pipelines for autoformalization, showing both false positive and false negative rates are significant. Proposes more robust benchmarking methodology.",
+    "addresses": ["2"],
+    "introduces": [],
+    "tags": ["evaluation", "reliability", "benchmarking"]
+  }
+]

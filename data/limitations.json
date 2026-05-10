@@ -1,0 +1,110 @@
+[
+  {
+    "id": "1", "category": "type-system", "severity": "major",
+    "title": "The Translation Paradox",
+    "desc": "Informal mathematics relies on high-context ambiguity; formal mathematics requires zero-ambiguity type precision. Type inference fails because natural language omits declarations.",
+    "issue": "Human writers omit type declarations — \"Let n be a number\" implies n ∈ ℕ or n ∈ ℝ depending on context.",
+    "failure": "Model infers types stochastically, guessing Float for reals or Int for naturals, causing cascading type mismatch errors.",
+    "exInput": "\"Let x be a number…\"",
+    "exOutput": "(x : Float) … → Compiler Error: expected Set ℝ, got Float.",
+    "refs": ["Tarrach et al. 2024", "Wu et al. 2025"],
+    "status": "open",
+    "addressedBy": []
+  },
+  {
+    "id": "2", "category": "evaluation", "severity": "structural",
+    "title": "Errors in Validation Pipeline",
+    "desc": "Both syntactic and semantic validation checks can be inaccurate, producing false positives or negatives. Real accuracy is typically lower than reported.",
+    "issue": "Semantic evaluation pipelines often contain LLMs which can be unexpectedly unreliable as verifiers.",
+    "failure": "False positive and false negative errors occur, inflating reported benchmark performance.",
+    "exInput": "Automated semantic equivalence check",
+    "exOutput": "Incorrect \"Pass\" verdict on semantically wrong formalization.",
+    "refs": ["Liu et al. 2024 (ASSESS)", "Poiroux et al. 2025"],
+    "status": "partial",
+    "addressedBy": ["poiroux-2025", "liu-2024-assess"]
+  },
+  {
+    "id": "3", "category": "logic", "severity": "minor",
+    "title": "Translation of Complex Logic",
+    "desc": "Competition-level problems contain bidirectional logic that models simplify, losing necessary converse directions.",
+    "issue": "Informal math contains iff constraints the LLM understands but encodes only partially.",
+    "failure": "Model formalizes only one direction of an iff, producing a strictly weaker statement.",
+    "exInput": "Find c ∈ ℝᵏ, r > 0 s.t. |x−a|=2|x−b| iff |x−c|=r.",
+    "exOutput": "Formalization encodes only the → direction; ← direction is absent.",
+    "refs": ["Herald 2025", "Liu et al. 2024", "Guo et al. 2025"],
+    "status": "open",
+    "addressedBy": []
+  },
+  {
+    "id": "4", "category": "semantics", "severity": "major",
+    "title": "Dimensional Misalignment",
+    "desc": "Models correctly identify algebraic structures but fail to capture dimensionality, producing valid code that formalizes a different problem.",
+    "issue": "Notation ℚ[x,y] vs ℚ[x] provides minimal visual distinction but a critical semantic difference.",
+    "failure": "Model defaults to univariate Polynomial instead of MvPolynomial (Fin 2), treating Y as a constant coefficient.",
+    "exInput": "\"Prove that x²+y²−1 is irreducible in ℚ[x,y].\"",
+    "exOutput": "Irreducible (X²+Y²−1 : Polynomial ℚ) := sorry",
+    "refs": ["Herald 2025", "Lu et al. 2025"],
+    "status": "open",
+    "addressedBy": []
+  },
+  {
+    "id": "5", "category": "syntax", "severity": "structural",
+    "title": "Definition Bottleneck",
+    "desc": "Fundamental conflict between the imperative flow of natural language and the declarative structure of dependent type theory.",
+    "issue": "Informal math defines objects linearly. Formal systems require dependency injection or hypothesis lifting.",
+    "failure": "Models insert let bindings into theorem signatures, syntactically illegal in Lean 4.",
+    "exInput": "\"First let x = 5, now consider f(x)…\"",
+    "exOutput": "Syntax error: expected ';' or unexpected token 'let'.",
+    "refs": ["Jiang et al. 2023", "Li et al. 2025"],
+    "status": "partial",
+    "addressedBy": ["jiang-2023"]
+  },
+  {
+    "id": "6", "category": "semantics", "severity": "major",
+    "title": "Semantic Drift — Tautology Trap",
+    "desc": "Models optimize for token likelihood, generating valid code that is mathematically trivial compared to the intended statement.",
+    "issue": "Complex geometric predicates are statistically rare; simple tautologies are statistically common in training data.",
+    "failure": "Model rewrites \"Show four points form a convex quadrilateral\" as \"The convex hull of four points is convex\" — a tautology.",
+    "exInput": "\"Show that four points form a convex quadrilateral.\"",
+    "exOutput": "\"Show that the convex hull of four points is convex.\" (tautology)",
+    "refs": ["PutnamBench 2024", "Liu et al. 2024"],
+    "status": "open",
+    "addressedBy": []
+  },
+  {
+    "id": "7", "category": "library", "severity": "major",
+    "title": "Library Hallucination",
+    "desc": "Models hallucinate Mathlib predicates that don't exist, causing identifier errors despite correct mathematical reasoning.",
+    "issue": "Lean's Mathlib is volatile and lacks formalized versions of many advanced concepts.",
+    "failure": "Model invents predicates like IsIcosahedronSet, UniformDistrib, IsNormal — all absent from Mathlib.",
+    "exInput": "\"Let G be a normal subgroup…\"",
+    "exOutput": "unknown identifier 'IsNormal'",
+    "refs": ["ATLAS 2025", "Herald 2025", "Wang et al. 2025"],
+    "status": "partial",
+    "addressedBy": ["atlas-2025"]
+  },
+  {
+    "id": "8", "category": "data", "severity": "structural",
+    "title": "\"The Wild\" vs \"The Lab\"",
+    "desc": "Benchmarks like MiniF2F cover well-supported high-school problems. Real-world definitions are far more demanding and context-dependent.",
+    "issue": "Wild definitions are intricate, context-dependent, and implicit — assuming extensive background theory.",
+    "failure": "Models tuned on MiniF2F fail on real-world definitions requiring deeply nested formal structures.",
+    "exInput": "Arbitrary Wikipedia mathematical definition",
+    "exOutput": "Compilation failure or semantically incorrect formalization.",
+    "refs": ["Zhang et al. 2025", "Li et al. 2025"],
+    "status": "open",
+    "addressedBy": []
+  },
+  {
+    "id": "9", "category": "semantics", "severity": "structural",
+    "title": "Implicit Knowledge Gap",
+    "desc": "Human textbooks omit steps \"obvious\" to readers that formal compilers strictly require, causing missing type class instance errors.",
+    "issue": "Proofs say \"it is trivial to see that X is a group\" — the implicit prerequisite is absent from the source text.",
+    "failure": "Lean 4 rejects code because a type class instance is missing from the dependency graph.",
+    "exInput": "\"It is trivial to see that X is a group…\"",
+    "exOutput": "failed to synthesize instance Group X",
+    "refs": ["Tarrach et al. 2024", "Wu et al. 2025"],
+    "status": "open",
+    "addressedBy": []
+  }
+]
