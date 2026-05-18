@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="font-mono" style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-light)' }}>
                 Research Blog · Neural-Symbolic Autoformalization
               </span>
-              <a href="https://a2dr1.github.io" className="back-link">
+              <a href="https://www.austinshen.com" className="back-link">
                 <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Austin Shen
               </a>
