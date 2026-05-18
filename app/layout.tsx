@@ -13,8 +13,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body style={{ background: 'var(--paper)', minHeight: '100vh' }}>
         <header style={{ borderBottom: '2px solid var(--ink)', background: 'var(--paper)' }}>
           <div style={{ maxWidth: 900, margin: '0 auto', padding: '28px 32px 0' }}>
-            <div className="font-mono" style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-light)', marginBottom: 12 }}>
-              Research Blog · Neural-Symbolic Autoformalization
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <span className="font-mono" style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-light)' }}>
+                Research Blog · Neural-Symbolic Autoformalization
+              </span>
+              <a href="https://a2dr1.github.io" style={{ fontSize: 11, color: 'var(--ink-light)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: 'monospace', letterSpacing: '0.05em' }}
+                onMouseOver={e => (e.currentTarget.style.color = 'var(--accent)')}
+                onMouseOut={e => (e.currentTarget.style.color = 'var(--ink-light)')}
+              >
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Austin Shen
+              </a>
             </div>
             <h1 className="font-serif" style={{ fontSize: 'clamp(24px,3.5vw,38px)', fontWeight: 500, lineHeight: 1.15, marginBottom: 8 }}>
               Current Limitations of{' '}
